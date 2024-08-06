@@ -53,9 +53,6 @@ enable_color = not is_vt or int(re.search(r"\d+", is_vt.group()).group()) >= 241
 
 enable_sound = '--no-sound' not in sys.argv
 
-if enable_sound:
-    import playsound
-
 term_columns, term_lines = 0, 0
 if is_vt:
     term_columns, term_lines = 80, 24
@@ -818,6 +815,10 @@ class thread_credits (threading.Thread):
 
 
 ################# Main ################
+if enable_sound:
+    os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+    import pygame
+
 begin_draw()
 clear()
 drawFrame()
@@ -867,7 +868,13 @@ while(lyrics[currentLyric].mode != 9):
             y = 0
         elif(lyrics[currentLyric].mode == 4):
             if enable_sound:
-                playsound.playsound(str(Path.cwd() / 'sa1.mp3'), False)
+                file = "sa1.mp3"
+                if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+                    bundle_dir = sys._MEIPASS
+                    file = os.path.join(bundle_dir, file)
+                pygame.mixer.init()
+                pygame.mixer.music.load(file)
+                pygame.mixer.music.play()
         elif(lyrics[currentLyric].mode == 5):
             th_credit = thread_credits()
             th_credit.daemon = True
